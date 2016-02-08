@@ -1,7 +1,5 @@
 package penBot;
 
-import org.jibble.pircbot.PircBot;
-
 public class PenBotMain {
 
 	public static void main(String[] args) throws Exception {
