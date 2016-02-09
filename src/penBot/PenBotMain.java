@@ -12,7 +12,7 @@ public class PenBotMain {
 		bot.setVerbose(true);
 
 		// Connect to the IRC server.
-		bot.connect("irc.twitch.tv", 6667,"oauth:ly98frmc48qp9tywex2a67org9txka");
+		bot.connect("irc.twitch.tv", 6667, "oauth:ly98frmc48qp9tywex2a67org9txka");
 
 		// Join the #pircbot channel.
 		bot.joinChannel("#penbotishere");
