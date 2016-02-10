@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 public class UserData {
 	private HashMap<String, JSONObject> users = new HashMap<>();
-	private File usersFile = new File("data/users.jon");
+	private File usersFile = new File("data/users.json");
 
 	public UserData() {
 		loadUsers();

@@ -1,12 +1,11 @@
 package penBot;
 
 import org.jibble.pircbot.PircBot;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.util.HashMap;
+import java.io.FileWriter;
 
 public class PenBot extends PircBot {
 
@@ -16,8 +15,9 @@ public class PenBot extends PircBot {
 
 	public PenBot(String name) {
 		this.setName(name);
-		this.changeNick(name);
 
+		//TODO make data specific to channel
+		//Note:Channel is not in the constructor.
 		lastTime = System.currentTimeMillis();
 
 		File f = new File("data");
@@ -45,7 +45,9 @@ public class PenBot extends PircBot {
 
 	public void onMessage(String channel, String sender, String login, String hostname, String message) {
 		User user = userData.getUser(sender);
-		switch (message.toLowerCase()) {
+		String [] splitM;
+		splitM = message.split(" ");
+		switch (splitM[0].toLowerCase()) {
 			case "!time":
 				String time = new java.util.Date().toString();
 				sendMessage(channel, sender + ": The time is now " + time);
@@ -70,9 +72,25 @@ public class PenBot extends PircBot {
 				leave(channel, sender);
 				break;
 			case "!join":
-				sendMessage(channel, "Joining " + sender + "'s channel...");
-				joinChannel("#" + sender);
+				if (sender.equalsIgnoreCase("penbotishere") && splitM[1] != null) {
+					sendMessage(channel, "Joining " + message.toLowerCase().substring(6) + "'s channel...");
+					joinChannel("#" + message.toLowerCase().substring(6));
+				} else {
+					sendMessage(channel, "Joining " + sender + "'s channel...");
+					joinChannel("#" + sender);
+				}
+				break;
+			case "!help":
+				//TODO link to formatted html which tells what commands exist
+				sendMessage(channel, "!time- current time !roulette-plays russian roulette !points-displays your current points !join-joins your channel !leave-bot leaves this channel if you're the owner");
+				break;
 		}
+		
+		/*if(message.toLowerCase().substring(0,5).equals("!join") && message.toLowerCase().substring(6) != null  && sender.equalsIgnoreCase("penbotishere")){
+			sendMessage(channel, "Joining " + message.toLowerCase().substring(6) + "'s channel...");
+			joinChannel("#" + message.toLowerCase().substring(6));
+		}*/
+		
 		checkUpdate();
 	}
 
@@ -95,7 +113,7 @@ public class PenBot extends PircBot {
 
 	public void checkUpdate() {
 		if (System.currentTimeMillis() - lastTime > 60000) {
-			userData.writeData();
+			writeData();
 			lastTime = System.currentTimeMillis();
 		}
 	}
@@ -103,8 +121,25 @@ public class PenBot extends PircBot {
 	public void leave(String channel, String name) {
 		if (name.equals(channel.substring(1))) {
 			sendMessage(channel, "Leaving " + name + "'s channel...");
-			userData.writeData();
+			writeData();
 			partChannel(channel);
+		}
+	}
+	
+	public void writeData() {
+		File f;
+		
+		userData.writeData();
+		try {
+			f = new File("data/var.txt");
+			if (!(f.exists())) {
+				f.createNewFile();
+			}
+			BufferedWriter writer = new BufferedWriter(new FileWriter("data/var.txt"));
+			writer.write("" + kappa);
+			writer.close();
+		} catch (Exception e) {
+			System.out.println("Var writer error");
 		}
 	}
 }
