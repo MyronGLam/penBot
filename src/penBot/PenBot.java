@@ -1,10 +1,12 @@
 package penBot;
 
 import org.jibble.pircbot.PircBot;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.HashMap;
 
 public class PenBot extends PircBot {
 
@@ -42,6 +44,7 @@ public class PenBot extends PircBot {
 	}
 
 	public void onMessage(String channel, String sender, String login, String hostname, String message) {
+		User user = userData.getUser(sender);
 		switch (message.toLowerCase()) {
 			case "!time":
 				String time = new java.util.Date().toString();
@@ -60,6 +63,15 @@ public class PenBot extends PircBot {
 			case "feelsbadman":
 				sendMessage(channel, "FeelsGoodMan");
 				break;
+			case "!points":
+				sendMessage(channel, "You have " + user.getPoints() + " points");
+				break;
+			case "!leave":
+				leave(channel, sender);
+				break;
+			case "!join":
+				sendMessage(channel, "Joining " + sender + "'s channel...");
+				joinChannel("#" + sender);
 		}
 		checkUpdate();
 	}
@@ -69,10 +81,14 @@ public class PenBot extends PircBot {
 		user.doRoulette();
 		if ((int) (Math.random() * 6) == 0) {
 			user.increaseDeaths();
-			sendMessage(channel, name + ", you have died. You have died " + user.getDeaths() + " times. You have played " +
+			sendMessage(channel, name + ", you have died. You lost 10 points. You have died " + user.getDeaths() + " times. You have played " +
 					"roulette " + user.getRouletteCount() + " times.");
+			if (user.getPoints() >= 10) {
+				user.removePoints(10);
+			}
 		} else {
-			sendMessage(channel, name + ", you have lived. You have played roulette " + user.getRouletteCount() + " times.");
+			sendMessage(channel, name + ", you have lived. You gained 10 points. You have played roulette " + user.getRouletteCount() + " times.");
+			user.addPoints(5);
 		}
 		userData.updateUser(user);
 	}
@@ -81,6 +97,14 @@ public class PenBot extends PircBot {
 		if (System.currentTimeMillis() - lastTime > 60000) {
 			userData.writeData();
 			lastTime = System.currentTimeMillis();
+		}
+	}
+	
+	public void leave(String channel, String name) {
+		if (name.equals(channel.substring(1))) {
+			sendMessage(channel, "Leaving " + name + "'s channel...");
+			userData.writeData();
+			partChannel(channel);
 		}
 	}
 }
